@@ -10,9 +10,10 @@ config_version=5
 
 [application]
 
-config/name="Nouveau projet de jeu"
+config/name="Roguelite w/ friends"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+config/tags=PackedStringArray("roguelite", "turn-based")
 
 [physics]
 
