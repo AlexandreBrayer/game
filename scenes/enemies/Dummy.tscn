@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bry76ainvuqe8"]
+
+[ext_resource type="Script" uid="uid://1gsp8cutkhg2" path="res://scripts/enemies/target_dummy.gd" id="1_n53wp"]
+[ext_resource type="Script" uid="uid://c15c4i3n3d2sa" path="res://scripts/data/enemy_data.gd" id="2_gwx3r"]
+
+[sub_resource type="Resource" id="Resource_myq0t"]
+script = ExtResource("2_gwx3r")
+enemy_name = "Dummy"
+enemy_description = "Le boss du ter ter"
+
+[node name="Dummy" type="Node2D" unique_id=2064785538]
+script = ExtResource("1_n53wp")
+data = SubResource("Resource_myq0t")

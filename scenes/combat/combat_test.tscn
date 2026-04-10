@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://cvgv6c6jli15o"]
+
+[ext_resource type="Script" uid="uid://cmsx8sus8anyr" path="res://scripts/combat/combat_test.gd" id="1_d1w0c"]
+[ext_resource type="PackedScene" uid="uid://cipkd7fl5nlw7" path="res://scenes/heroes/googi/Googi.tscn" id="2_w1m1o"]
+[ext_resource type="PackedScene" uid="uid://bry76ainvuqe8" path="res://scenes/enemies/Dummy.tscn" id="3_w1m1o"]
+
+[node name="CombatTest" type="Node2D" unique_id=467947708]
+script = ExtResource("1_d1w0c")
+
+[node name="Googi" parent="." unique_id=1930585805 instance=ExtResource("2_w1m1o")]
+
+[node name="Dummy" parent="." unique_id=2064785538 instance=ExtResource("3_w1m1o")]

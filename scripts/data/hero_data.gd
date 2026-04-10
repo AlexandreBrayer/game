@@ -13,5 +13,3 @@ extends Resource
 @export var base_crit: float = 0.05
 @export var base_heal: int = 0
 
-@export_group("Spells")
-@export var spells: Array[SpellData] = []

@@ -28,6 +28,7 @@ var shield: int = 0:
 
 var statuses: Dictionary = {}
 var cooldowns: Dictionary = {}
+var passives: Array[Passive] = []
 
 # référence optionnelle vers le noeud héros dans la scène
 var source_node: Node = null
