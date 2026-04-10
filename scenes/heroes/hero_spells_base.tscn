@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://e06d81fgg0tn"]
-
-[ext_resource type="Script" uid="uid://bl6g23dfxc3nd" path="res://scripts/heroes/hero_spells.gd" id="1_2ydtq"]
-
-[node name="HeroSpellsBase" type="Node2D" unique_id=180752395]
-script = ExtResource("1_2ydtq")

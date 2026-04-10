@@ -1,7 +1,0 @@
-[gd_scene format=3 uid="uid://dy6urrx8ccg43"]
-
-[ext_resource type="Script" uid="uid://b8at6ov3khgu6" path="res://scripts/heroes/hero_base.gd" id="1_ula7r"]
-
-[node name="HeroBase" type="Node2D" unique_id=469842298]
-rotation = -2.8797934
-script = ExtResource("1_ula7r")
