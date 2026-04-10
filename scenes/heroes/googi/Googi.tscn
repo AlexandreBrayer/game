@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://cipkd7fl5nlw7"]
+
+[ext_resource type="Script" uid="uid://bms165ebupk7u" path="res://scripts/heroes/googi/googi.gd" id="1_4mwd6"]
+[ext_resource type="Texture2D" uid="uid://dyf2tlsdgaykh" path="res://icon.svg" id="2_uywes"]
+[ext_resource type="Script" uid="uid://crcajjiuuijxr" path="res://scripts/data/hero_data.gd" id="3_gm5ei"]
+[ext_resource type="Script" uid="uid://duuhmxtcl5va3" path="res://scripts/data/spell_data.gd" id="4_auuam"]
+
+[sub_resource type="Resource" id="Resource_uywes"]
+script = ExtResource("3_gm5ei")
+hero_name = "Googi"
+hero_description = "Googi the cat"
+hero_icon = ExtResource("2_uywes")
+metadata/_custom_type_script = "uid://crcajjiuuijxr"
+
+[node name="Googi" type="Node2D" unique_id=1930585805]
+script = ExtResource("1_4mwd6")
+data = SubResource("Resource_uywes")
