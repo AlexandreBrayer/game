@@ -2,6 +2,8 @@ class_name EnemyBase
 extends Node2D
 
 signal passive_triggered(passive_id: String)
+signal damage_received(amount: int, attacker: BattleUnit)
+signal action_used(action_name: String)
 
 @export var data: EnemyData
 
@@ -36,6 +38,7 @@ func take_damage(amount: int, attacker: BattleUnit = null) -> int:
 	if current > 0:
 		var received := battle_unit.apply_damage(current)
 		if received > 0:
+			damage_received.emit(received, attacker)
 			on_damaged(received)
 		return received
 	return 0
@@ -68,13 +71,41 @@ func on_battle_end(_victory: bool) -> void:
 	pass
 
 
-# IA : à override dans chaque ennemi
-# heroes = Array de HeroBase vivants
-func choose_action(heroes: Array) -> int:
-	return 0
+# Utilitaire : attaque via la chaîne passive (comme HeroBase.deal_damage)
+func deal_damage(target: BattleUnit, amount: int) -> void:
+	if target.source_node != null and target.source_node.has_method("take_damage"):
+		target.source_node.take_damage(amount, battle_unit)
+	else:
+		target.apply_damage(amount)
+	if not target.is_alive():
+		on_kill(target)
 
-func cast_action(index: int, heroes: Array) -> void:
-	pass
+
+# IA : liste des actions disponibles (à override)
+# Chaque dict : { "name": String, "targets": int }
+#   targets == -1  → toutes les cibles
+#   targets > 0   → N cibles au choix (random)
+func get_actions() -> Array[Dictionary]:
+	return [{"name": "Attaque", "targets": 1}]
+
+
+# IA : choisit aléatoirement parmi les actions non en cooldown
+func choose_action(_heroes: Array) -> int:
+	var actions := get_actions()
+	var available: Array[int] = []
+	for i in actions.size():
+		if battle_unit.get_cooldown(str(i)) <= 0:
+			available.append(i)
+	if available.is_empty():
+		return 0
+	return available[randi() % available.size()]
+
+
+# À override dans chaque ennemi ; heroes = cibles déjà filtrées par CombatManager
+func cast_action(index: int, _heroes: Array) -> void:
+	var actions := get_actions()
+	var action_name: String = actions[index]["name"] if index < actions.size() else "Attaque"
+	action_used.emit(action_name)
 
 
 func _cleanup_passives() -> void:

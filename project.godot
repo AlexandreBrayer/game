@@ -15,6 +15,10 @@ config/tags=PackedStringArray("roguelite", "turn-based")
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+CombatLog="*uid://djwn7caxijjrq"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

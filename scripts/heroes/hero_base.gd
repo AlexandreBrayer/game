@@ -4,6 +4,7 @@ extends Node2D
 signal spell_cast(spell_index: int, caster: BattleUnit)
 signal status_applied(status_id: String, target: BattleUnit)
 signal passive_triggered(passive_id: String)
+signal damage_received(amount: int, attacker: BattleUnit)
 
 @export var data: HeroData
 
@@ -25,39 +26,60 @@ func create_battle_unit() -> BattleUnit:
 func on_battle_start() -> void:
 	for p in battle_unit.passives:
 		p.on_battle_start(battle_unit)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
 func on_turn_start() -> void:
 	for p in battle_unit.passives:
 		p.on_turn_start(battle_unit)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
 func on_turn_end() -> void:
 	for p in battle_unit.passives:
 		p.on_turn_end(battle_unit)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
-func on_damaged(amount: int) -> void:
+func on_damaged(_amount: int) -> void:
 	pass
 
 func on_healed(amount: int) -> void:
 	for p in battle_unit.passives:
 		p.on_healed(battle_unit, amount)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
 func on_kill(target: BattleUnit) -> void:
 	for p in battle_unit.passives:
 		p.on_kill(battle_unit, target)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
 func on_ally_died(ally: BattleUnit) -> void:
 	for p in battle_unit.passives:
 		p.on_ally_died(battle_unit, ally)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
 func on_battle_end(victory: bool) -> void:
 	for p in battle_unit.passives:
 		p.on_battle_end(battle_unit, victory)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 
 
@@ -68,10 +90,14 @@ func take_damage(amount: int, attacker: BattleUnit = null) -> int:
 	var current := amount
 	for p in battle_unit.passives:
 		current = p.on_take_damage(battle_unit, current, attacker)
+		if p.log_message != "":
+			passive_triggered.emit(p.log_message)
+			p.log_message = ""
 	_cleanup_passives()
 	if current > 0:
 		var received := battle_unit.apply_damage(current)
 		if received > 0:
+			damage_received.emit(received, attacker)
 			on_damaged(received)
 		return received
 	return 0
@@ -112,7 +138,7 @@ func get_spells() -> Array[Dictionary]:
 
 
 # Exécute le sort à l'index donné sur les cibles
-func cast_spell(index: int, targets: Array[BattleUnit]) -> void:
+func cast_spell(_index: int, _targets: Array[BattleUnit]) -> void:
 	pass
 
 

@@ -38,13 +38,31 @@ var _pending_spell_index: int = -1
 func start_combat(p_heroes: Array[HeroBase], p_enemies: Array[EnemyBase]) -> void:
 	heroes = p_heroes
 	enemies = p_enemies
+	CombatLog.clear()
+	CombatLog.log("=== Combat commence ===")
 
 	for h in heroes:
 		h.on_battle_start()
-		h.battle_unit.died.connect(_on_unit_died.bind(h.battle_unit))
+		h.spell_cast.connect(func(spell_index: int, _caster: BattleUnit):
+			var sname: String = h.get_spells()[spell_index].get("name", "Sort %d" % spell_index)
+			CombatLog.log("  %s utilise %s" % [h.data.hero_name, sname])
+		)
+		h.passive_triggered.connect(func(msg): CombatLog.log("  ❆ [%s] %s" % [h.data.hero_name, msg]))
+		h.damage_received.connect(func(amount: int, attacker: BattleUnit):
+			var att := attacker.unit_name if attacker else "?"
+			CombatLog.log("  %s inflige %d dégâts à %s (%d/%d HP)" % [att, amount, h.battle_unit.unit_name, h.battle_unit.hp, h.battle_unit.hp_max])
+		)
+		h.battle_unit.died.connect(func(): CombatLog.log("  ✖ %s est mort !" % h.battle_unit.unit_name))
 	for e in enemies:
 		e.on_battle_start()
-		e.battle_unit.died.connect(_on_unit_died.bind(e.battle_unit))
+		e.battle_unit.died.connect(func(): CombatLog.log("  ✖ %s est mort !" % e.battle_unit.unit_name))
+		e.damage_received.connect(func(amount: int, attacker: BattleUnit):
+			var att := attacker.unit_name if attacker else "?"
+			CombatLog.log("  %s inflige %d dégâts à %s (%d/%d HP)" % [att, amount, e.battle_unit.unit_name, e.battle_unit.hp, e.battle_unit.hp_max])
+		)
+		e.action_used.connect(func(action_name: String):
+			CombatLog.log("  %s utilise %s" % [e.battle_unit.unit_name, action_name])
+		)
 
 	_build_turn_order()
 	state = State.PLAYER_TURN
@@ -80,6 +98,7 @@ func _next_turn() -> void:
 	current.battle_unit.tick_cooldowns()
 	current.battle_unit.tick_statuses()
 	current.on_turn_start()
+	CombatLog.log("\n— Tour de %s —" % current.battle_unit.unit_name)
 	turn_started.emit(current.battle_unit)
 
 	if current is HeroBase:
@@ -100,8 +119,24 @@ func _start_enemy_turn(enemy: EnemyBase) -> void:
 	var living_heroes := heroes.filter(func(h): return h.battle_unit.is_alive())
 	if living_heroes.is_empty():
 		return
+
 	var idx := enemy.choose_action(living_heroes)
-	enemy.cast_action(idx, living_heroes)
+
+	# Filtre les cibles selon le champ targets de l'action
+	var actions := enemy.get_actions()
+	var target_count: int = 1
+	if idx < actions.size():
+		target_count = actions[idx].get("targets", 1)
+
+	var targets: Array
+	if target_count == -1:
+		targets = living_heroes
+	else:
+		var shuffled := living_heroes.duplicate()
+		shuffled.shuffle()
+		targets = shuffled.slice(0, mini(target_count, shuffled.size()))
+
+	enemy.cast_action(idx, targets)
 	_end_turn(enemy)
 
 
@@ -163,12 +198,14 @@ func _check_end() -> bool:
 
 	if not enemies_alive:
 		state = State.VICTORY
+		CombatLog.log("\n=== Victoire ! ===")
 		for h in heroes:
 			h.on_battle_end(true)
 		combat_ended.emit(true)
 		return true
 	if not heroes_alive:
 		state = State.DEFEAT
+		CombatLog.log("\n=== Défaite… ===")
 		for h in heroes:
 			h.on_battle_end(false)
 		combat_ended.emit(false)
@@ -176,11 +213,3 @@ func _check_end() -> bool:
 	return false
 
 
-func _on_unit_died(_unit: BattleUnit) -> void:
-	# Notifie les alliés
-	for h in heroes:
-		if not h.battle_unit.is_alive():
-			continue
-		# On notifie seulement si c'est un allié qui est mort
-		# (logique étendue possible ici pour les ennemis aussi)
-	pass

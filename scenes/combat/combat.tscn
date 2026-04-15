@@ -8,9 +8,15 @@
 [ext_resource type="Script" uid="uid://dqhw7w3yqrvs0" path="res://scripts/ui/combat_hud.gd" id="5_jgg25"]
 [ext_resource type="Script" uid="uid://c15c4i3n3d2sa" path="res://scripts/data/enemy_data.gd" id="6_ijgaf"]
 
-[sub_resource type="Resource" id="Resource_ijgaf"]
+[sub_resource type="Resource" id="Resource_4a6i5"]
 script = ExtResource("4_jgg25")
 hero_name = "Googi"
+hero_description = "Goooogiiiii"
+metadata/_custom_type_script = "uid://crcajjiuuijxr"
+
+[sub_resource type="Resource" id="Resource_ijgaf"]
+script = ExtResource("4_jgg25")
+hero_name = "Googi 2"
 hero_description = "Goooogiiiii"
 metadata/_custom_type_script = "uid://crcajjiuuijxr"
 
@@ -19,15 +25,15 @@ script = ExtResource("6_ijgaf")
 enemy_name = "Dummy"
 enemy_description = "Nigaud"
 base_atk = 0
-base_vit = 100
+base_vit = 0
 metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
 
 [sub_resource type="Resource" id="Resource_uakg0"]
 script = ExtResource("6_ijgaf")
-enemy_name = "Dummy"
+enemy_name = "Dummy 2"
 enemy_description = "Nigaud"
-base_atk = 0
-base_vit = 100
+base_atk = 5
+base_vit = 0
 metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
 
 [node name="Combat" type="Node2D" unique_id=1919400605]
@@ -36,21 +42,25 @@ script = ExtResource("1_5vqsm")
 [node name="CombatManager" type="Node2D" parent="." unique_id=698776423]
 script = ExtResource("2_pqpfu")
 
-[node name="Heroes" type="Node2D" parent="." unique_id=1610340548]
+[node name="Heroes" type="Node" parent="." unique_id=425981848]
 
 [node name="Googi" type="Node2D" parent="Heroes" unique_id=1497495668]
 script = ExtResource("3_ltalu")
 parade_agile_reflect_percent = 1.0
-data = SubResource("Resource_ijgaf")
+deluge_de_griffes_cooldown = 2
+parade_agile_cooldown = 3
+data = SubResource("Resource_4a6i5")
 metadata/_custom_type_script = "uid://bms165ebupk7u"
 
 [node name="Googi2" type="Node2D" parent="Heroes" unique_id=856366032]
 script = ExtResource("3_ltalu")
 parade_agile_reflect_percent = 1.0
+deluge_de_griffes_cooldown = 2
+parade_agile_cooldown = 3
 data = SubResource("Resource_ijgaf")
 metadata/_custom_type_script = "uid://bms165ebupk7u"
 
-[node name="Enemies" type="Node2D" parent="." unique_id=489179561]
+[node name="Enemies" type="Node" parent="." unique_id=315207578]
 
 [node name="TargetDummy" type="Node2D" parent="Enemies" unique_id=367969838]
 script = ExtResource("4_4voa6")
@@ -59,6 +69,8 @@ metadata/_custom_type_script = "uid://1gsp8cutkhg2"
 
 [node name="TargetDummy2" type="Node2D" parent="Enemies" unique_id=320367388]
 script = ExtResource("4_4voa6")
+base_damage = 20
+aoe_damage = 20
 data = SubResource("Resource_uakg0")
 metadata/_custom_type_script = "uid://1gsp8cutkhg2"
 
@@ -78,6 +90,7 @@ unique_name_in_owner = true
 layout_mode = 2
 
 [node name="ActionPanel" type="VBoxContainer" parent="CombatHUD/Main" unique_id=1761134649]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="HeroLabel" type="Label" parent="CombatHUD/Main/ActionPanel" unique_id=835206709]
@@ -91,3 +104,18 @@ layout_mode = 2
 [node name="StatusLabel" type="Label" parent="CombatHUD/Main/ActionPanel" unique_id=1081899789]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="LogPanel" type="PanelContainer" parent="CombatHUD/Main" unique_id=1445181104]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 2
+
+[node name="LogScroll" type="ScrollContainer" parent="CombatHUD/Main/LogPanel" unique_id=1534712459]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="LogList" type="VBoxContainer" parent="CombatHUD/Main/LogPanel/LogScroll" unique_id=1906338985]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_vertical = 8

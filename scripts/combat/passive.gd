@@ -10,6 +10,10 @@ var duration: int = -1
 # Mis à true par le passif lui-même quand il doit être retiré (usage unique, durée écoulée…)
 var consumed: bool = false
 
+# Message de log à renseigner par le passif quand il se déclenche.
+# HeroBase le lit après chaque hook, émet passive_triggered, puis remet à "".
+var log_message: String = ""
+
 
 # -- Hooks appelés par HeroBase (owner = la BattleUnit qui possède ce passif) --
 

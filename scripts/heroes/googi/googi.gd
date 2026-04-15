@@ -31,14 +31,14 @@ func get_spells() -> Array[Dictionary]:
 func cast_spell(index: int, targets: Array[BattleUnit]) -> void:
 	if battle_unit.get_cooldown(str(index)) > 0:
 		return
+	spell_cast.emit(index, battle_unit)
+	var cd: int = get_spells()[index].get("cooldown_max", 0)
+	if cd > 0:
+		battle_unit.set_cooldown(str(index), cd)
 	match index:
 		0: _frappe_agile(targets)
 		1: _deluge_de_griffes(targets)
 		2: _parade_agile(targets)
-	var cd: int = get_spells()[index].get("cooldown_max", 0)
-	if cd > 0:
-		battle_unit.set_cooldown(str(index), cd)
-	spell_cast.emit(index, battle_unit)
 
 
 func _frappe_agile(targets: Array[BattleUnit]) -> void:

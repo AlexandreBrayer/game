@@ -12,9 +12,8 @@ func _init(reflect: float = DAMAGE_REFLECT_PERCENTAGE) -> void:
 
 
 func on_take_damage(_owner: BattleUnit, amount: int, attacker: BattleUnit) -> int:
-	print("  [Passif] Parade Agile : parade réussie, dégâts annulés et reflet de %d%%" % int(self.damage_reflect_percentage * 100))
+	log_message = "Parade Agile : parade réussie, %d%% des dégâts renvoyés à l'attaquant" % int(self.damage_reflect_percentage * 100)
 	if attacker and attacker.is_alive():
-		# Reflect a portion of the damage back to the attacker
 		attacker.apply_damage(int(amount * self.damage_reflect_percentage))
 	consumed = true
 	return 0

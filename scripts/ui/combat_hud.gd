@@ -1,21 +1,13 @@
 class_name CombatHUD
 extends CanvasLayer
 
-# -- Noeuds attendus dans la scène --
-# CombatHUD (CanvasLayer)
-# └── Main (VBoxContainer)
-#     ├── EnemiesRow       (HBoxContainer)  ← barres HP ennemis
-#     ├── HeroesRow        (HBoxContainer)  ← barres HP héros
-#     └── ActionPanel      (VBoxContainer)
-#         ├── HeroLabel    (Label)          ← "Tour de X"
-#         ├── SpellButtons (HBoxContainer)  ← boutons sorts
-#         └── StatusLabel  (Label)          ← "Choisissez une cible…"
-
 @onready var enemies_row: HBoxContainer   = %EnemiesRow
 @onready var heroes_row: HBoxContainer    = %HeroesRow
 @onready var hero_label: Label            = %HeroLabel
 @onready var spell_buttons: HBoxContainer = %SpellButtons
 @onready var status_label: Label          = %StatusLabel
+@onready var log_scroll: ScrollContainer  = %LogScroll
+@onready var log_list: VBoxContainer      = %LogList
 
 var _manager: CombatManager = null
 var _pending_spell_index: int = -1
@@ -32,11 +24,22 @@ var _hero_cards: Array = []
 func setup(manager: CombatManager) -> void:
 	_manager = manager
 	_set_action_panel_visible(false)
+	CombatLog.entry_added.connect(_on_log_entry)
 	_manager.hero_action_requested.connect(_on_hero_action_requested)
 	_manager.target_selection_requested.connect(_on_target_selection_requested)
 	_manager.state_changed.connect(_on_state_changed)
 	_manager.combat_ended.connect(_on_combat_ended)
 	_manager.turn_started.connect(_on_turn_started)
+
+
+func _on_log_entry(text: String) -> void:
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
+	log_list.add_child(lbl)
+	# scroll vers le bas au prochain frame
+	await get_tree().process_frame
+	log_scroll.scroll_vertical = int(log_scroll.get_v_scroll_bar().max_value)
 
 
 func build_cards() -> void:
