@@ -8,7 +8,6 @@ extends HeroBase
 
 func _ready() -> void:
 	super._ready()
-	battle_unit.passives.append(PassiveKillHeal.new())
 	print(data.hero_name + " a " + str(battle_unit.hp) + " HP et " + str(battle_unit.atk) + " ATK.")
 
 

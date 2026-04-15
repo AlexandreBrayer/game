@@ -7,4 +7,5 @@ func _init() -> void:
 
 
 func on_kill(owner: BattleUnit, _target: BattleUnit) -> void:
-	owner.apply_heal(int(owner.hp_max * 0.05))
+	var healed := owner.apply_heal(int(owner.hp_max * 0.05))
+	print("  [Passif] Kill Heal : +%d HP (%d / %d)" % [healed, owner.hp, owner.hp_max])
