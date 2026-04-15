@@ -77,6 +77,17 @@ func take_damage(amount: int, attacker: BattleUnit = null) -> int:
 	return 0
 
 
+# Utilitaire : inflige des dégâts à une cible en passant par son take_damage() si disponible.
+# À utiliser dans tous les sorts pour respecter les passifs ennemis.
+func deal_damage(target: BattleUnit, amount: int) -> void:
+	if target.source_node and target.source_node.has_method("take_damage"):
+		target.source_node.take_damage(amount, battle_unit)
+	else:
+		target.apply_damage(amount)
+	if not target.is_alive():
+		on_kill(target)
+
+
 func _cleanup_passives() -> void:
 	var i := battle_unit.passives.size() - 1
 	while i >= 0:
@@ -112,4 +123,3 @@ func spell_needs_targeting(index: int) -> bool:
 		return false
 	var t: Dictionary = spells[index].get("targets", {"enemies": 1, "allies": 0})
 	return t.get("enemies", 0) > 0 or t.get("allies", 0) > 0
-

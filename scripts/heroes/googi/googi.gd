@@ -1,10 +1,17 @@
 class_name Googi
 extends HeroBase
 
-@export_group("Config")
+@export_group("General config")
 @export var frappe_agile_damages: float = 20.0
 @export var deluge_de_griffes_damages: float = 10.0
-
+@export var parade_agile_reflect_percent: float = 0.5
+@export_group("Spells config")
+@export var frappe_agile_cooldown: int = 0
+@export var deluge_de_griffes_cooldown: int = 1
+@export var parade_agile_cooldown: int = 2
+@export var frappe_agile_description: String = "Attaque rapide sur une cible."
+@export var deluge_de_griffes_description: String = "Frappe tous les ennemis."
+@export var parade_agile_description: String = "Parade qui annule les dégâts du prochain coup et reflète une partie des dégâts sur l'attaquant."
 
 func _ready() -> void:
 	super._ready()
@@ -15,9 +22,9 @@ func _ready() -> void:
 
 func get_spells() -> Array[Dictionary]:
 	return [
-		{"name": "Frappe Agile", "description": "Attaque rapide sur une cible.", "cooldown_max": 0, "targets": {"enemies": 1, "allies": 0}},
-		{"name": "Déluge de Griffes", "description": "Frappe tous les ennemis", "cooldown_max": 1, "targets": {"enemies": -1, "allies": 0}},
-		{"name": "Parade Agile", "description": "Frappe tous les ennemis.", "cooldown_max": 2, "targets": {"enemies": 0, "allies": 0}},
+		{"name": "Frappe Agile", "description": frappe_agile_description, "cooldown_max": frappe_agile_cooldown, "targets": {"enemies": 1, "allies": 0}},
+		{"name": "Déluge de Griffes", "description": deluge_de_griffes_description, "cooldown_max": deluge_de_griffes_cooldown, "targets": {"enemies": - 1, "allies": 0}},
+		{"name": "Parade Agile", "description": parade_agile_description, "cooldown_max": parade_agile_cooldown, "targets": {"enemies": 0, "allies": 0}},
 	]
 
 
@@ -36,20 +43,14 @@ func cast_spell(index: int, targets: Array[BattleUnit]) -> void:
 
 func _frappe_agile(targets: Array[BattleUnit]) -> void:
 	for t in targets:
-		var dmg := int(battle_unit.atk + frappe_agile_damages)
-		t.apply_damage(dmg)
-		if not t.is_alive():
-			on_kill(t)
+		deal_damage(t, int(battle_unit.atk + frappe_agile_damages))
 
 
 func _deluge_de_griffes(targets: Array[BattleUnit]) -> void:
 	for t in targets:
-		var dmg := int(battle_unit.atk * 0.5 + deluge_de_griffes_damages)
-		t.apply_damage(dmg)
-		if not t.is_alive():
-			on_kill(t)
+		deal_damage(t, int(battle_unit.atk * 0.5 + deluge_de_griffes_damages))
 
 
 func _parade_agile(_targets: Array[BattleUnit]) -> void:
-	battle_unit.passives.append(PassiveParadeAgile.new())
+	battle_unit.passives.append(PassiveParadeAgile.new(parade_agile_reflect_percent))
 	passive_triggered.emit("parade_agile")

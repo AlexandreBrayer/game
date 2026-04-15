@@ -1,0 +1,93 @@
+[gd_scene format=3 uid="uid://dcsf5gab01ljw"]
+
+[ext_resource type="Script" uid="uid://3mg048gp81m0" path="res://scripts/combat/combat.gd" id="1_5vqsm"]
+[ext_resource type="Script" uid="uid://b8b5d3nt58tqd" path="res://scripts/combat/combat_manager.gd" id="2_pqpfu"]
+[ext_resource type="Script" uid="uid://bms165ebupk7u" path="res://scripts/heroes/googi/googi.gd" id="3_ltalu"]
+[ext_resource type="Script" uid="uid://1gsp8cutkhg2" path="res://scripts/enemies/target_dummy.gd" id="4_4voa6"]
+[ext_resource type="Script" uid="uid://crcajjiuuijxr" path="res://scripts/data/hero_data.gd" id="4_jgg25"]
+[ext_resource type="Script" uid="uid://dqhw7w3yqrvs0" path="res://scripts/ui/combat_hud.gd" id="5_jgg25"]
+[ext_resource type="Script" uid="uid://c15c4i3n3d2sa" path="res://scripts/data/enemy_data.gd" id="6_ijgaf"]
+
+[sub_resource type="Resource" id="Resource_ijgaf"]
+script = ExtResource("4_jgg25")
+hero_name = "Googi"
+hero_description = "Goooogiiiii"
+metadata/_custom_type_script = "uid://crcajjiuuijxr"
+
+[sub_resource type="Resource" id="Resource_8cw2p"]
+script = ExtResource("6_ijgaf")
+enemy_name = "Dummy"
+enemy_description = "Nigaud"
+base_atk = 0
+base_vit = 100
+metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
+
+[sub_resource type="Resource" id="Resource_uakg0"]
+script = ExtResource("6_ijgaf")
+enemy_name = "Dummy"
+enemy_description = "Nigaud"
+base_atk = 0
+base_vit = 100
+metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
+
+[node name="Combat" type="Node2D" unique_id=1919400605]
+script = ExtResource("1_5vqsm")
+
+[node name="CombatManager" type="Node2D" parent="." unique_id=698776423]
+script = ExtResource("2_pqpfu")
+
+[node name="Heroes" type="Node2D" parent="." unique_id=1610340548]
+
+[node name="Googi" type="Node2D" parent="Heroes" unique_id=1497495668]
+script = ExtResource("3_ltalu")
+parade_agile_reflect_percent = 1.0
+data = SubResource("Resource_ijgaf")
+metadata/_custom_type_script = "uid://bms165ebupk7u"
+
+[node name="Googi2" type="Node2D" parent="Heroes" unique_id=856366032]
+script = ExtResource("3_ltalu")
+parade_agile_reflect_percent = 1.0
+data = SubResource("Resource_ijgaf")
+metadata/_custom_type_script = "uid://bms165ebupk7u"
+
+[node name="Enemies" type="Node2D" parent="." unique_id=489179561]
+
+[node name="TargetDummy" type="Node2D" parent="Enemies" unique_id=367969838]
+script = ExtResource("4_4voa6")
+data = SubResource("Resource_8cw2p")
+metadata/_custom_type_script = "uid://1gsp8cutkhg2"
+
+[node name="TargetDummy2" type="Node2D" parent="Enemies" unique_id=320367388]
+script = ExtResource("4_4voa6")
+data = SubResource("Resource_uakg0")
+metadata/_custom_type_script = "uid://1gsp8cutkhg2"
+
+[node name="CombatHUD" type="CanvasLayer" parent="." unique_id=1630289200]
+script = ExtResource("5_jgg25")
+
+[node name="Main" type="VBoxContainer" parent="CombatHUD" unique_id=515793363]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="EnemiesRow" type="HBoxContainer" parent="CombatHUD/Main" unique_id=1980629057]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeroesRow" type="HBoxContainer" parent="CombatHUD/Main" unique_id=2020642681]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ActionPanel" type="VBoxContainer" parent="CombatHUD/Main" unique_id=1761134649]
+layout_mode = 2
+
+[node name="HeroLabel" type="Label" parent="CombatHUD/Main/ActionPanel" unique_id=835206709]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SpellButtons" type="HBoxContainer" parent="CombatHUD/Main/ActionPanel" unique_id=421961099]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="CombatHUD/Main/ActionPanel" unique_id=1081899789]
+unique_name_in_owner = true
+layout_mode = 2

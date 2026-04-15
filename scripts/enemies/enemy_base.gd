@@ -68,13 +68,12 @@ func on_battle_end(_victory: bool) -> void:
 	pass
 
 
-# -- IA : à override dans chaque ennemi --
-
-# Retourne l'index de l'action choisie (même logique que cast_spell)
-func choose_action(heroes: Array[BattleUnit]) -> int:
+# IA : à override dans chaque ennemi
+# heroes = Array de HeroBase vivants
+func choose_action(heroes: Array) -> int:
 	return 0
 
-func cast_action(index: int, targets: Array[BattleUnit]) -> void:
+func cast_action(index: int, heroes: Array) -> void:
 	pass
 
 
