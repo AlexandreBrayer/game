@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://crcajjiuuijxr" path="res://scripts/data/hero_data.gd" id="4_jgg25"]
 [ext_resource type="Script" uid="uid://dqhw7w3yqrvs0" path="res://scripts/ui/combat_hud.gd" id="5_jgg25"]
 [ext_resource type="Script" uid="uid://c15c4i3n3d2sa" path="res://scripts/data/enemy_data.gd" id="6_ijgaf"]
+[ext_resource type="Texture2D" uid="uid://dll3x56bnk3c4" path="res://assets/sprites/combat/background.jpg" id="8_uakg0"]
 
 [sub_resource type="Resource" id="Resource_4a6i5"]
 script = ExtResource("4_jgg25")
@@ -45,8 +46,9 @@ script = ExtResource("2_pqpfu")
 [node name="Heroes" type="Node" parent="." unique_id=425981848]
 
 [node name="Googi" type="Node2D" parent="Heroes" unique_id=1497495668]
+position = Vector2(11, 0)
 script = ExtResource("3_ltalu")
-parade_agile_reflect_percent = 1.0
+parade_agile_reflect_percent = 0.33
 deluge_de_griffes_cooldown = 2
 parade_agile_cooldown = 3
 data = SubResource("Resource_4a6i5")
@@ -73,6 +75,26 @@ base_damage = 20
 aoe_damage = 20
 data = SubResource("Resource_uakg0")
 metadata/_custom_type_script = "uid://1gsp8cutkhg2"
+
+[node name="BackgroundControl" type="CanvasLayer" parent="." unique_id=981638600]
+
+[node name="Control" type="Control" parent="BackgroundControl" unique_id=1114108616]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="BackgroundControl/Control" unique_id=1662060790]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_uakg0")
+expand_mode = 1
 
 [node name="CombatHUD" type="CanvasLayer" parent="." unique_id=1630289200]
 script = ExtResource("5_jgg25")
