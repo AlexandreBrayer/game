@@ -4,15 +4,91 @@ extends Node2D
 signal passive_triggered(passive_id: String)
 signal damage_received(amount: int, attacker: BattleUnit)
 signal action_used(action_name: String)
+signal unit_clicked(unit: BattleUnit)
 
 @export var data: EnemyData
 
 var battle_unit: BattleUnit = null
+var sprite: Sprite2D = null
+var _is_highlighted: bool = false
+var _is_selectable: bool  = false
+var _glow_phase: float    = 0.0
 
 
 func _ready() -> void:
 	assert(data != null, "EnemyBase: data (EnemyData) must be set on " + name)
 	battle_unit = _create_battle_unit()
+	_setup_sprite()
+	_setup_visual()
+
+
+func _setup_sprite() -> void:
+	if has_node("Sprite2D"):
+		sprite = $Sprite2D as Sprite2D
+	else:
+		sprite = Sprite2D.new()
+		sprite.name = "Sprite2D"
+		add_child(sprite)
+	if data.sprite_texture:
+		sprite.texture = data.sprite_texture
+	else:
+		sprite.texture = _make_placeholder(Color(1.0, 0.35, 0.3))
+	sprite.flip_h = true
+
+
+func _make_placeholder(color: Color) -> ImageTexture:
+	var img := Image.create(64, 128, false, Image.FORMAT_RGBA8)
+	img.fill(color)
+	return ImageTexture.create_from_image(img)
+
+
+func _setup_visual() -> void:
+	var half_h := sprite.texture.get_height() / 2.0 if sprite.texture else 64.0
+	var overlay := UnitOverlay.new()
+	overlay.position = Vector2(0.0, -half_h - 18.0)
+	overlay.z_index = 5
+	add_child(overlay)
+	overlay.setup(battle_unit)
+
+
+func set_highlighted(value: bool) -> void:
+	_is_highlighted = value
+	_glow_phase = 0.0
+
+
+func set_selectable(value: bool) -> void:
+	_is_selectable = value
+
+
+func _process(delta: float) -> void:
+	if sprite == null:
+		return
+	if battle_unit == null or not battle_unit.is_alive():
+		sprite.modulate = Color(0.4, 0.4, 0.4, 1.0)
+		return
+	if _is_highlighted:
+		_glow_phase += delta * 4.0
+		var t := (sin(_glow_phase) + 1.0) / 2.0
+		sprite.modulate = Color(0.5 + t * 0.2, 0.72 + t * 0.1, 1.0 + t * 0.4, 1.0)
+	elif _is_selectable:
+		sprite.modulate = Color(1.3, 1.2, 0.45, 1.0)
+	else:
+		sprite.modulate = Color.WHITE
+
+
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton
+			and event.button_index == MOUSE_BUTTON_LEFT
+			and event.pressed):
+		return
+	if sprite == null or sprite.texture == null:
+		return
+	var mouse_local := to_local(get_global_mouse_position())
+	var hw := sprite.texture.get_width()  / 2.0
+	var hh := sprite.texture.get_height() / 2.0
+	if Rect2(-hw, -hh, hw * 2.0, hh * 2.0).has_point(mouse_local):
+		unit_clicked.emit(battle_unit)
+		get_viewport().set_input_as_handled()
 
 
 func _create_battle_unit() -> BattleUnit:

@@ -4,6 +4,7 @@ extends Resource
 @export var hero_name: String = ""
 @export_multiline var hero_description: String = ""
 @export var hero_icon: Texture2D
+@export var sprite_texture: Texture2D
 
 @export_group("Base Stats")
 @export var base_hp: int = 100

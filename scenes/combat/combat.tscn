@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bms165ebupk7u" path="res://scripts/heroes/googi/googi.gd" id="3_ltalu"]
 [ext_resource type="Script" uid="uid://1gsp8cutkhg2" path="res://scripts/enemies/target_dummy.gd" id="4_4voa6"]
 [ext_resource type="Script" uid="uid://crcajjiuuijxr" path="res://scripts/data/hero_data.gd" id="4_jgg25"]
+[ext_resource type="Texture2D" uid="uid://dyf2tlsdgaykh" path="res://icon.svg" id="5_8cw2p"]
 [ext_resource type="Script" uid="uid://dqhw7w3yqrvs0" path="res://scripts/ui/combat_hud.gd" id="5_jgg25"]
 [ext_resource type="Script" uid="uid://c15c4i3n3d2sa" path="res://scripts/data/enemy_data.gd" id="6_ijgaf"]
 [ext_resource type="Texture2D" uid="uid://dll3x56bnk3c4" path="res://assets/sprites/combat/background.jpg" id="8_uakg0"]
@@ -13,18 +14,21 @@
 script = ExtResource("4_jgg25")
 hero_name = "Googi"
 hero_description = "Goooogiiiii"
+sprite_texture = ExtResource("5_8cw2p")
 metadata/_custom_type_script = "uid://crcajjiuuijxr"
 
 [sub_resource type="Resource" id="Resource_ijgaf"]
 script = ExtResource("4_jgg25")
 hero_name = "Googi 2"
 hero_description = "Goooogiiiii"
+sprite_texture = ExtResource("5_8cw2p")
 metadata/_custom_type_script = "uid://crcajjiuuijxr"
 
 [sub_resource type="Resource" id="Resource_8cw2p"]
 script = ExtResource("6_ijgaf")
 enemy_name = "Dummy"
 enemy_description = "Nigaud"
+sprite_texture = ExtResource("5_8cw2p")
 base_atk = 0
 base_vit = 0
 metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
@@ -33,15 +37,12 @@ metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
 script = ExtResource("6_ijgaf")
 enemy_name = "Dummy 2"
 enemy_description = "Nigaud"
-base_atk = 5
+sprite_texture = ExtResource("5_8cw2p")
 base_vit = 0
 metadata/_custom_type_script = "uid://c15c4i3n3d2sa"
 
 [node name="Combat" type="Node2D" unique_id=1919400605]
 script = ExtResource("1_5vqsm")
-
-[node name="CombatManager" type="Node2D" parent="." unique_id=698776423]
-script = ExtResource("2_pqpfu")
 
 [node name="Heroes" type="Node" parent="." unique_id=425981848]
 
@@ -72,11 +73,15 @@ metadata/_custom_type_script = "uid://1gsp8cutkhg2"
 [node name="TargetDummy2" type="Node2D" parent="Enemies" unique_id=320367388]
 script = ExtResource("4_4voa6")
 base_damage = 20
-aoe_damage = 20
+aoe_damage = 5
 data = SubResource("Resource_uakg0")
 metadata/_custom_type_script = "uid://1gsp8cutkhg2"
 
+[node name="CombatManager" type="Node2D" parent="." unique_id=698776423]
+script = ExtResource("2_pqpfu")
+
 [node name="BackgroundControl" type="CanvasLayer" parent="." unique_id=981638600]
+layer = -1
 
 [node name="Control" type="Control" parent="BackgroundControl" unique_id=1114108616]
 layout_mode = 3
@@ -97,40 +102,83 @@ texture = ExtResource("8_uakg0")
 expand_mode = 1
 
 [node name="CombatHUD" type="CanvasLayer" parent="." unique_id=1630289200]
+layer = 2
 script = ExtResource("5_jgg25")
 
-[node name="Main" type="VBoxContainer" parent="CombatHUD" unique_id=515793363]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Main" type="Control" parent="CombatHUD" unique_id=515793363]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="EnemiesRow" type="HBoxContainer" parent="CombatHUD/Main" unique_id=1980629057]
+[node name="HeroLabel" type="Label" parent="CombatHUD/Main" unique_id=835206709]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.6
+anchor_right = 0.3333
+anchor_bottom = 0.6667
+offset_left = 10.0
+offset_right = -10.0
+
+[node name="StatusLabel" type="Label" parent="CombatHUD/Main" unique_id=1081899789]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3333
+anchor_top = 0.92
+anchor_right = 0.6667
+anchor_bottom = 1.0
+offset_bottom = -10.0
+horizontal_alignment = 1
+
+[node name="SpellPanel" type="PanelContainer" parent="CombatHUD/Main" unique_id=1761134649]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.6667
+anchor_right = 0.3333
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SpellMargin" type="MarginContainer" parent="CombatHUD/Main/SpellPanel" unique_id=100000003]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="SpellButtons" type="GridContainer" parent="CombatHUD/Main/SpellPanel/SpellMargin" unique_id=421961099]
 unique_name_in_owner = true
 layout_mode = 2
-
-[node name="HeroesRow" type="HBoxContainer" parent="CombatHUD/Main" unique_id=2020642681]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="ActionPanel" type="VBoxContainer" parent="CombatHUD/Main" unique_id=1761134649]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="HeroLabel" type="Label" parent="CombatHUD/Main/ActionPanel" unique_id=835206709]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="SpellButtons" type="HBoxContainer" parent="CombatHUD/Main/ActionPanel" unique_id=421961099]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="StatusLabel" type="Label" parent="CombatHUD/Main/ActionPanel" unique_id=1081899789]
-unique_name_in_owner = true
-layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
 
 [node name="LogPanel" type="PanelContainer" parent="CombatHUD/Main" unique_id=1445181104]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(400, 300)
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -320.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="LogScroll" type="ScrollContainer" parent="CombatHUD/Main/LogPanel" unique_id=1534712459]
 unique_name_in_owner = true
