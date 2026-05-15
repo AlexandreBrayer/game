@@ -181,10 +181,11 @@ func take_damage(amount: int, attacker: BattleUnit = null) -> int:
 # Utilitaire : inflige des dégâts à une cible en passant par son take_damage() si disponible.
 # À utiliser dans tous les sorts pour respecter les passifs ennemis.
 func deal_damage(target: BattleUnit, amount: int) -> void:
+	var final_amount := battle_unit.compute_outgoing_damage(amount)
 	if target.source_node and target.source_node.has_method("take_damage"):
-		target.source_node.take_damage(amount, battle_unit)
+		target.source_node.take_damage(final_amount, battle_unit)
 	else:
-		target.apply_damage(amount)
+		target.apply_damage(final_amount)
 	if not target.is_alive():
 		on_kill(target)
 

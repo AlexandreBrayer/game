@@ -29,6 +29,8 @@ var shield: int = 0:
 var statuses: Dictionary = {}
 var cooldowns: Dictionary = {}
 var passives: Array[Passive] = []
+## Buffs de dégâts sortants : Array de {flat: int, mult_bonus: float, turns: int}
+var damage_buffs: Array = []
 
 # référence optionnelle vers le noeud héros dans la scène
 var source_node: Node = null
@@ -101,3 +103,22 @@ func tick_cooldowns() -> void:
 		cooldowns[id] -= 1
 		if cooldowns[id] <= 0:
 			cooldowns.erase(id)
+
+
+func tick_damage_buffs() -> void:
+	var i := damage_buffs.size() - 1
+	while i >= 0:
+		damage_buffs[i]["turns"] -= 1
+		if damage_buffs[i]["turns"] <= 0:
+			damage_buffs.remove_at(i)
+		i -= 1
+
+
+## Applique les buffs de dégâts actifs sur un montant de base.
+func compute_outgoing_damage(base: int) -> int:
+	var flat := 0
+	var mult := 1.0
+	for buff in damage_buffs:
+		flat += buff.get("flat", 0)
+		mult += buff.get("mult_bonus", 0.0)
+	return int((base + flat) * mult)

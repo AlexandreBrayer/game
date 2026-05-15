@@ -16,6 +16,8 @@ var _pending_spell_meta: Dictionary = {}
 var _selected_targets: Array[BattleUnit] = []
 var _needed_enemies: int = 0
 var _needed_allies: int  = 0
+var _current_hero: HeroBase = null
+var _targeting_item: UsableItem = null
 
 
 func setup(manager: CombatManager) -> void:
@@ -27,6 +29,8 @@ func setup(manager: CombatManager) -> void:
 	_manager.state_changed.connect(_on_state_changed)
 	_manager.combat_ended.connect(_on_combat_ended)
 	_manager.turn_started.connect(_on_turn_started)
+	_manager.item_menu_requested.connect(_on_item_menu_requested)
+	_manager.item_target_requested.connect(_on_item_target_requested)
 
 
 func _on_log_entry(text: String) -> void:
@@ -50,6 +54,7 @@ func build_cards() -> void:
 # -- Callbacks manager --
 
 func _on_hero_action_requested(hero: HeroBase) -> void:
+	_current_hero = hero
 	hero_label.text = "Tour de " + hero.data.hero_name
 	status_label.text = "Choisissez un sort"
 	_build_spell_buttons(hero)
@@ -100,6 +105,13 @@ func _build_spell_buttons(hero: HeroBase) -> void:
 	for child in spell_buttons.get_children():
 		child.queue_free()
 
+	# Bouton objets si l'inventaire n'est pas vide
+	if not _manager.inventory.is_empty():
+		var item_btn: Button = SpellButtonScene.instantiate()
+		item_btn.text = "Objets"
+		item_btn.pressed.connect(func(): _manager.on_item_menu_opened())
+		spell_buttons.add_child(item_btn)
+
 	var spells := hero.get_spells()
 	for i in spells.size():
 		var spell: Dictionary = spells[i]
@@ -117,6 +129,47 @@ func _build_spell_buttons(hero: HeroBase) -> void:
 
 func _on_spell_button_pressed(index: int) -> void:
 	_manager.on_spell_selected(index)
+
+
+# -- Objets --
+
+func _on_item_menu_requested(_hero: HeroBase) -> void:
+	_build_item_buttons()
+
+
+func _build_item_buttons() -> void:
+	for child in spell_buttons.get_children():
+		child.queue_free()
+
+	# Bouton retour
+	var back_btn: Button = SpellButtonScene.instantiate()
+	back_btn.text = "<- Sorts"
+	back_btn.pressed.connect(func(): _build_spell_buttons(_current_hero))
+	spell_buttons.add_child(back_btn)
+
+	for item in _manager.inventory:
+		if item.uses == 0:
+			continue
+		var btn: Button = SpellButtonScene.instantiate()
+		btn.text = item.item_name if item.uses < 0 else "%s (%d)" % [item.item_name, item.uses]
+		btn.tooltip_text = item.description
+		btn.pressed.connect(_on_item_button_pressed.bind(item))
+		spell_buttons.add_child(btn)
+
+
+
+func _on_item_button_pressed(item: UsableItem) -> void:
+	_manager.on_item_selected(item)
+
+
+func _on_item_target_requested(_hero: HeroBase, item: UsableItem) -> void:
+	_targeting_item = item
+	_selected_targets.clear()
+	var t: Dictionary = item.targets
+	_needed_enemies = t.get("enemies", 0)
+	_needed_allies  = t.get("allies", 0)
+	status_label.text = "Cible pour " + item.item_name
+	_set_units_selectable(_needed_enemies > 0, _needed_allies > 0)
 
 
 # -- Sélection de cibles --
@@ -140,7 +193,11 @@ func _on_unit_card_pressed(unit: BattleUnit) -> void:
 	var allies_ok  := _needed_allies  <= 0 or ally_count  >= _needed_allies
 
 	if enemies_ok and allies_ok:
-		_manager.on_targets_selected(_selected_targets)
+		if _targeting_item != null:
+			_manager.on_item_targets_selected(_selected_targets)
+			_targeting_item = null
+		else:
+			_manager.on_targets_selected(_selected_targets)
 		_set_units_selectable(false, false)
 
 

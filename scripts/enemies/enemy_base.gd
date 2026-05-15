@@ -149,10 +149,11 @@ func on_battle_end(_victory: bool) -> void:
 
 # Utilitaire : attaque via la chaîne passive (comme HeroBase.deal_damage)
 func deal_damage(target: BattleUnit, amount: int) -> void:
+	var final_amount := battle_unit.compute_outgoing_damage(amount)
 	if target.source_node != null and target.source_node.has_method("take_damage"):
-		target.source_node.take_damage(amount, battle_unit)
+		target.source_node.take_damage(final_amount, battle_unit)
 	else:
-		target.apply_damage(amount)
+		target.apply_damage(final_amount)
 	if not target.is_alive():
 		on_kill(target)
 

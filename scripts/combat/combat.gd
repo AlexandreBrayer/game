@@ -34,6 +34,7 @@ func _ready() -> void:
 	_position_heroes(heroes)
 	_position_enemies(enemies)
 
+	_populate_inventory()
 	combat_hud.setup(combat_manager)
 	combat_manager.start_combat(heroes, enemies)
 	combat_hud.build_cards()
@@ -53,3 +54,45 @@ func _position_enemies(enemies: Array) -> void:
 	for i in count:
 		var x := screen_center_x + team_gap / 2.0 + i * unit_spacing
 		enemies[i].position = Vector2(x, row_y)
+
+
+func _populate_inventory() -> void:
+	# -- Potion de soin (x3) --
+	var potion := ItemHeal.new()
+	potion.item_name  = "Potion"
+	potion.description = "Restaure 40 PV à un allié."
+	potion.heal_amount = 40
+	potion.uses        = 3
+	potion.targets     = {"enemies": 0, "allies": 1}
+	combat_manager.inventory.append(potion)
+
+	# -- Grande Potion (x1) --
+	var grande := ItemHeal.new()
+	grande.item_name   = "Grande Potion"
+	grande.description = "Restaure 100 PV à un allié."
+	grande.heal_amount = 100
+	grande.uses        = 1
+	grande.targets     = {"enemies": 0, "allies": 1}
+	combat_manager.inventory.append(grande)
+
+	# -- Elixir de Force (x2) : +20 dégâts fixes pendant 3 tours --
+	var elixir := ItemDamageBoost.new()
+	elixir.item_name    = "Elixir de Force"
+	elixir.description  = "Confère +20 dégâts fixes pendant 3 tours."
+	elixir.flat_bonus   = 20
+	elixir.mult_bonus   = 0.0
+	elixir.duration_turns = 3
+	elixir.uses         = 2
+	elixir.targets      = {"enemies": 0, "allies": 1}
+	combat_manager.inventory.append(elixir)
+
+	# -- Berserk (x1) : +50 % dégâts pendant 2 tours --
+	var berserk := ItemDamageBoost.new()
+	berserk.item_name     = "Rage Berserk"
+	berserk.description   = "Confère +50 % de dégâts pendant 2 tours."
+	berserk.flat_bonus    = 0
+	berserk.mult_bonus    = 0.5
+	berserk.duration_turns = 2
+	berserk.uses          = 1
+	berserk.targets       = {"enemies": 0, "allies": 1}
+	combat_manager.inventory.append(berserk)

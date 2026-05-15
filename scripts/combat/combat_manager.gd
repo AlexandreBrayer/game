@@ -5,10 +5,14 @@ extends Node
 signal state_changed(state: State)
 signal turn_started(unit: BattleUnit)
 signal combat_ended(victory: bool)
-# Emis quand le joueur doit choisir un sort pour un héros
+# Emis quand le joueur doit choisir un sort pour un hero
 signal hero_action_requested(hero: HeroBase)
 # Emis quand le joueur doit choisir des cibles
 signal target_selection_requested(hero: HeroBase, spell_index: int, spell_meta: Dictionary)
+# Emis pour ouvrir la liste d'objets
+signal item_menu_requested(hero: HeroBase)
+# Emis quand un objet necessite une selection de cibles
+signal item_target_requested(hero: HeroBase, item: UsableItem)
 
 enum State {
 	IDLE,
@@ -29,10 +33,14 @@ var state: State = State.IDLE:
 var heroes: Array[HeroBase] = []
 var enemies: Array[EnemyBase] = []
 
-var _turn_order: Array = []       # mix HeroBase | EnemyBase trié par VIT
+var _turn_order: Array = []       # mix HeroBase | EnemyBase trie par VIT
 var _current_index: int = 0
 var _pending_hero: HeroBase = null
 var _pending_spell_index: int = -1
+var _pending_item: UsableItem = null
+
+## Inventaire partage de la run (peuple par la scene avant start_combat).
+var inventory: Array[UsableItem] = []
 
 
 func start_combat(p_heroes: Array[HeroBase], p_enemies: Array[EnemyBase]) -> void:
@@ -97,6 +105,7 @@ func _next_turn() -> void:
 	var current = _turn_order[_current_index]
 	current.battle_unit.tick_cooldowns()
 	current.battle_unit.tick_statuses()
+	current.battle_unit.tick_damage_buffs()
 	current.on_turn_start()
 	CombatLog.log("\n— Tour de %s —" % current.battle_unit.unit_name)
 	turn_started.emit(current.battle_unit)
@@ -167,11 +176,55 @@ func on_spell_selected(spell_index: int) -> void:
 		target_selection_requested.emit(_pending_hero, spell_index, spell_meta)
 
 
-# Le joueur a confirmé ses cibles
+# Le joueur a confirme ses cibles (sort)
 func on_targets_selected(targets: Array[BattleUnit]) -> void:
 	if state != State.WAITING_TARGET or _pending_hero == null:
 		return
 	_resolve_hero_spell(_pending_hero, _pending_spell_index, targets)
+
+
+# -- API objets --
+
+## Appele par le HUD quand le joueur clique sur le bouton Objets.
+func on_item_menu_opened() -> void:
+	if state != State.WAITING_SPELL or _pending_hero == null:
+		return
+	item_menu_requested.emit(_pending_hero)
+
+
+## Appele par le HUD quand le joueur selectionne un objet dans la liste.
+func on_item_selected(item: UsableItem) -> void:
+	if state != State.WAITING_SPELL or _pending_hero == null:
+		return
+	_pending_item = item
+	var t: Dictionary = item.targets
+	if t.get("enemies", 0) <= 0 and t.get("allies", 0) <= 0:
+		var msg := item.use(_pending_hero.battle_unit, [])
+		_consume_item(item)
+		CombatLog.log("  [ITEM] " + msg)
+		_pending_item = null
+		_end_turn(_pending_hero)
+	else:
+		state = State.WAITING_TARGET
+		item_target_requested.emit(_pending_hero, item)
+
+
+## Appele par le HUD quand les cibles d'un objet sont confirmees.
+func on_item_targets_selected(targets: Array[BattleUnit]) -> void:
+	if state != State.WAITING_TARGET or _pending_hero == null or _pending_item == null:
+		return
+	var msg := _pending_item.use(_pending_hero.battle_unit, targets)
+	_consume_item(_pending_item)
+	CombatLog.log("  [ITEM] " + msg)
+	_pending_item = null
+	_end_turn(_pending_hero)
+
+
+func _consume_item(item: UsableItem) -> void:
+	if item.uses > 0:
+		item.uses -= 1
+		if item.uses == 0:
+			inventory.erase(item)
 
 
 func _resolve_hero_spell(hero: HeroBase, spell_index: int, targets: Array[BattleUnit]) -> void:
