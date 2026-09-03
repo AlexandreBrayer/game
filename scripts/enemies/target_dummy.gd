@@ -6,21 +6,19 @@ extends EnemyBase
 @export var aoe_damage: int = 1
 
 
-func get_actions() -> Array[Dictionary]:
+func get_spells() -> Array[Dictionary]:
 	return [
-		{"name": "Frappe", "targets": 1},
-		{"name": "Frappe AOE", "targets": - 1},
+		{"name": "Frappe",     "targets": {"enemies": 1,  "allies": 0}},
+		{"name": "Frappe AOE", "targets": {"enemies": -1, "allies": 0}},
 	]
 
 
-func cast_action(index: int, heroes: Array) -> void:
-	super.cast_action(index, heroes)
+func cast_spell(index: int, targets: Array[BattleUnit]) -> void:
+	super.cast_spell(index, targets)
 	match index:
-		0: # Frappe simple
-			for hero in heroes:
-				if hero is HeroBase:
-					deal_damage(hero.battle_unit, base_damage + battle_unit.atk)
-		1: # AOE
-			for hero in heroes:
-				if hero is HeroBase:
-					deal_damage(hero.battle_unit, aoe_damage + battle_unit.atk)
+		0:
+			for t in targets:
+				deal_damage(t, base_damage + battle_unit.atk)
+		1:
+			for t in targets:
+				deal_damage(t, aoe_damage + battle_unit.atk)

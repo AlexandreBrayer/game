@@ -11,11 +11,7 @@ extends UsableItem
 
 func use(user: BattleUnit, p_targets: Array[BattleUnit]) -> String:
 	for t in p_targets:
-		t.damage_buffs.append({
-			"flat": flat_bonus,
-			"mult_bonus": mult_bonus,
-			"turns": duration_turns,
-		})
+		t.add_damage_buff(flat_bonus, mult_bonus, duration_turns)
 	var target_names := ", ".join(p_targets.map(func(t): return t.unit_name))
 	return "%s utilise %s sur %s → +%d dégâts fixes pendant %d tours" \
 			% [user.unit_name, item_name, target_names, flat_bonus, duration_turns]

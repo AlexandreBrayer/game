@@ -4,6 +4,7 @@ extends RefCounted
 signal hp_changed(current: int, maximum: int)
 signal shield_changed(current: int)
 signal died()
+signal buffs_changed()
 
 var unit_name: String = ""
 var is_hero: bool = true
@@ -75,6 +76,7 @@ func add_status(status_id: String, duration: int, stacks: int = 1) -> void:
 		statuses[status_id]["duration"] = maxi(statuses[status_id]["duration"], duration)
 	else:
 		statuses[status_id] = {"duration": duration, "stacks": stacks}
+	buffs_changed.emit()
 
 
 func tick_statuses() -> void:
@@ -85,6 +87,8 @@ func tick_statuses() -> void:
 			to_remove.append(id)
 	for id in to_remove:
 		statuses.erase(id)
+	if not to_remove.is_empty():
+		buffs_changed.emit()
 
 
 func get_cooldown(spell_id: String) -> int:
@@ -106,12 +110,26 @@ func tick_cooldowns() -> void:
 
 
 func tick_damage_buffs() -> void:
+	var changed := false
 	var i := damage_buffs.size() - 1
 	while i >= 0:
 		damage_buffs[i]["turns"] -= 1
 		if damage_buffs[i]["turns"] <= 0:
 			damage_buffs.remove_at(i)
+			changed = true
 		i -= 1
+	if changed:
+		buffs_changed.emit()
+
+
+## Ajoute un buff de dégâts à l'unité et émet le signal.
+func add_damage_buff(flat: int, mult_bonus: float, turns: int) -> void:
+	damage_buffs.append({
+		"flat": flat,
+		"mult_bonus": mult_bonus,
+		"turns": turns,
+	})
+	buffs_changed.emit()
 
 
 ## Applique les buffs de dégâts actifs sur un montant de base.

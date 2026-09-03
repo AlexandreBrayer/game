@@ -68,8 +68,9 @@ func start_combat(p_heroes: Array[HeroBase], p_enemies: Array[EnemyBase]) -> voi
 			var att := attacker.unit_name if attacker else "?"
 			CombatLog.log("  %s inflige %d dégâts à %s (%d/%d HP)" % [att, amount, e.battle_unit.unit_name, e.battle_unit.hp, e.battle_unit.hp_max])
 		)
-		e.action_used.connect(func(action_name: String):
-			CombatLog.log("  %s utilise %s" % [e.battle_unit.unit_name, action_name])
+		e.spell_cast.connect(func(spell_index: int, _caster: BattleUnit):
+			var sname: String = e.get_spells()[spell_index].get("name", "Action %d" % spell_index)
+			CombatLog.log("  %s utilise %s" % [e.battle_unit.unit_name, sname])
 		)
 
 	_build_turn_order()
@@ -125,27 +126,42 @@ func _start_hero_turn(hero: HeroBase) -> void:
 func _start_enemy_turn(enemy: EnemyBase) -> void:
 	state = State.ENEMY_TURN
 	await get_tree().create_timer(0.5).timeout  # pause visuelle
+
 	var living_heroes := heroes.filter(func(h): return h.battle_unit.is_alive())
 	if living_heroes.is_empty():
 		return
 
-	var idx := enemy.choose_action(living_heroes)
+	var idx := enemy.choose_spell()
+	var spells := enemy.get_spells()
+	var spell_meta: Dictionary = spells[idx] if idx < spells.size() else {}
+	var t: Dictionary = spell_meta.get("targets", {"enemies": 1, "allies": 0})
 
-	# Filtre les cibles selon le champ targets de l'action
-	var actions := enemy.get_actions()
-	var target_count: int = 1
-	if idx < actions.size():
-		target_count = actions[idx].get("targets", 1)
+	# Résolution des cibles en BattleUnit (point de vue ennemi : "enemies"=héros, "allies"=ennemis)
+	var targets: Array[BattleUnit] = []
+	var enemy_count: int = t.get("enemies", 0)
+	var ally_count: int  = t.get("allies",  0)
 
-	var targets: Array
-	if target_count == -1:
-		targets = living_heroes
-	else:
+	if enemy_count == -1:
+		for h in living_heroes:
+			targets.append(h.battle_unit)
+	elif enemy_count > 0:
 		var shuffled := living_heroes.duplicate()
 		shuffled.shuffle()
-		targets = shuffled.slice(0, mini(target_count, shuffled.size()))
+		for h in shuffled.slice(0, mini(enemy_count, shuffled.size())):
+			targets.append(h.battle_unit)
 
-	enemy.cast_action(idx, targets)
+	if ally_count != 0:
+		var living_allies := enemies.filter(func(e): return e != enemy and e.battle_unit.is_alive())
+		if ally_count == -1:
+			for e in living_allies:
+				targets.append(e.battle_unit)
+		else:
+			var shuffled := living_allies.duplicate()
+			shuffled.shuffle()
+			for e in shuffled.slice(0, mini(ally_count, shuffled.size())):
+				targets.append(e.battle_unit)
+
+	enemy.cast_spell(idx, targets)
 	_end_turn(enemy)
 
 

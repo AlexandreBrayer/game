@@ -3,7 +3,7 @@ extends Node2D
 
 signal passive_triggered(passive_id: String)
 signal damage_received(amount: int, attacker: BattleUnit)
-signal action_used(action_name: String)
+signal spell_cast(spell_index: int, caster: BattleUnit)
 signal unit_clicked(unit: BattleUnit)
 
 @export var data: EnemyData
@@ -158,19 +158,22 @@ func deal_damage(target: BattleUnit, amount: int) -> void:
 		on_kill(target)
 
 
-# IA : liste des actions disponibles (à override)
-# Chaque dict : { "name": String, "targets": int }
-#   targets == -1  → toutes les cibles
-#   targets > 0   → N cibles au choix (random)
-func get_actions() -> Array[Dictionary]:
-	return [{"name": "Attaque", "targets": 1}]
+# IA : liste des sorts/actions disponibles (à override).
+# Même format que HeroBase.get_spells() :
+#   { "name": String, "cooldown_max": int, "targets": { "enemies": int, "allies": int } }
+# Du point de vue de l'ennemi : "enemies" = héros, "allies" = autres ennemis.
+#   N > 0  → N cibles choisies aléatoirement
+#   -1     → toutes les unités du groupe
+#   0      → groupe ignoré
+func get_spells() -> Array[Dictionary]:
+	return [{"name": "Attaque", "targets": {"enemies": 1, "allies": 0}}]
 
 
-# IA : choisit aléatoirement parmi les actions non en cooldown
-func choose_action(_heroes: Array) -> int:
-	var actions := get_actions()
+# IA : choisit aléatoirement parmi les sorts non en cooldown.
+func choose_spell() -> int:
+	var spells := get_spells()
 	var available: Array[int] = []
-	for i in actions.size():
+	for i in spells.size():
 		if battle_unit.get_cooldown(str(i)) <= 0:
 			available.append(i)
 	if available.is_empty():
@@ -178,11 +181,16 @@ func choose_action(_heroes: Array) -> int:
 	return available[randi() % available.size()]
 
 
-# À override dans chaque ennemi ; heroes = cibles déjà filtrées par CombatManager
-func cast_action(index: int, _heroes: Array) -> void:
-	var actions := get_actions()
-	var action_name: String = actions[index]["name"] if index < actions.size() else "Attaque"
-	action_used.emit(action_name)
+# À override dans chaque ennemi.
+# targets : cibles déjà résolues par CombatManager sous forme de BattleUnit.
+func cast_spell(index: int, targets: Array[BattleUnit]) -> void:
+	if not battle_unit.is_alive():
+		return
+	spell_cast.emit(index, battle_unit)
+	var spells := get_spells()
+	var cd: int = spells[index].get("cooldown_max", 0) if index < spells.size() else 0
+	if cd > 0:
+		battle_unit.set_cooldown(str(index), cd)
 
 
 func _cleanup_passives() -> void:
